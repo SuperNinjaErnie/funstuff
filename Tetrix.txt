@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apple Eater</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #87ceeb;
+            margin: 0;
+        }
+        canvas {
+            background: #fff;
+            border: 2px solid #333;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <button id="startButton">Start Game</button>
+    <canvas id="gameCanvas" width="400" height="400" style="display: none;"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const grid = 20;
+        let snake, direction, apple, score, changingDirection, game;
+
+        function initializeGame() {
+            snake = [{ x: 9 * grid, y: 9 * grid }];
+            direction = 'RIGHT';
+            apple = { x: Math.floor(Math.random() * 20) * grid, y: Math.floor(Math.random() * 20) * grid };
+            score = 0;
+            changingDirection = false;
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw snake
+            for (let i = 0; i < snake.length; i++) {
+                ctx.fillStyle = (i === 0) ? 'green' : 'lightgreen';
+                ctx.fillRect(snake[i].x, snake[i].y, grid, grid);
+                ctx.strokeStyle = 'darkgreen';
+                ctx.strokeRect(snake[i].x, snake[i].y, grid, grid);
+            }
+
+            // Draw apple
+            ctx.fillStyle = 'red';
+            ctx.fillRect(apple.x, apple.y, grid, grid);
+
+            // Move snake
+            const head = { x: snake[0].x + (direction === 'RIGHT' ? grid : direction === 'LEFT' ? -grid : 0), y: snake[0].y + (direction === 'DOWN' ? grid : direction === 'UP' ? -grid : 0) };
+
+            // Check if snake eats apple
+            if (head.x === apple.x && head.y === apple.y) {
+                score++;
+                apple = { x: Math.floor(Math.random() * 20) * grid, y: Math.floor(Math.random() * 20) * grid };
+            } else {
+                snake.pop();
+            }
+
+            // Add new head to the snake
+            snake.unshift(head);
+
+            // Check for collisions
+            if (head.x < 0 || head.y < 0 || head.x >= canvas.width || head.y >= canvas.height || collision(head, snake)) {
+                clearInterval(game);
+                alert('Game Over');
+                document.getElementById('startButton').style.display = 'block';
+                canvas.style.display = 'none';
+                return;
+            }
+
+            changingDirection = false;
+        }
+
+        function collision(head, array) {
+            for (let i = 4; i < array.length; i++) {
+                if (head.x === array[i].x && head.y === array[i].y) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function changeDirection(event) {
+            if (changingDirection) return;
+            changingDirection = true;
+            const keyPressed = event.key;
+            const goingUp = direction === 'UP';
+            const goingDown = direction === 'DOWN';
+            const goingRight = direction === 'RIGHT';
+            const goingLeft = direction === 'LEFT';
+
+            if (keyPressed === 'ArrowLeft' && !goingRight) {
+                direction = 'LEFT';
+            }
+            if (keyPressed === 'ArrowUp' && !goingDown) {
+                direction = 'UP';
+            }
+            if (keyPressed === 'ArrowRight' && !goingLeft) {
+                direction = 'RIGHT';
+            }
+            if (keyPressed === 'ArrowDown' && !goingUp) {
+                direction = 'DOWN';
+            }
+        }
+
+        document.addEventListener('keydown', changeDirection);
+
+        document.getElementById('startButton').addEventListener('click', () => {
+            document.getElementById('startButton').style.display = 'none';
+            canvas.style.display = 'block';
+            initializeGame();
+            game = setInterval(draw, 200); // Slowed down the snake speed by increasing the interval to 200ms
+        });
+    </script>
+</body>
+</html>

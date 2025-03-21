@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookie Smacker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+        h1 {
+            margin-top: 20px;
+        }
+        #cookie {
+            width: 200px;
+            cursor: pointer;
+        }
+        .upgrade-btn {
+            margin: 10px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .upgrade-btn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cookie Smacker</h1>
+    <p>Cookies: <span id="cookieCount">0</span></p>
+    <img id="cookie" src="https://upload.wikimedia.org/wikipedia/commons/6/69/Chocolate_Chip_Cookie.png" alt="Cookie">
+    <div>
+        <button class="upgrade-btn" id="upgradeClick" onclick="buyUpgrade('click')">Upgrade Click (Cost: <span id="clickUpgradeCost">10</span>)</button>
+        <button class="upgrade-btn" id="upgradeAuto" onclick="buyUpgrade('auto')">Auto Smacker (Cost: <span id="autoUpgradeCost">100</span>)</button>
+    </div>
+
+    <script>
+        let cookieCount = 0;
+        let clickValue = 1;
+        let autoSmacker = 0;
+        let clickUpgradeCost = 10;
+        let autoUpgradeCost = 100;
+
+        const cookie = document.getElementById('cookie');
+        const cookieCountDisplay = document.getElementById('cookieCount');
+        const clickUpgradeCostDisplay = document.getElementById('clickUpgradeCost');
+        const autoUpgradeCostDisplay = document.getElementById('autoUpgradeCost');
+
+        cookie.addEventListener('click', () => {
+            cookieCount += clickValue;
+            updateDisplay();
+        });
+
+        function buyUpgrade(upgrade) {
+            if (upgrade === 'click' && cookieCount >= clickUpgradeCost) {
+                cookieCount -= clickUpgradeCost;
+                clickValue++;
+                clickUpgradeCost *= 2;
+            } else if (upgrade === 'auto' && cookieCount >= autoUpgradeCost) {
+                cookieCount -= autoUpgradeCost;
+                autoSmacker++;
+                autoUpgradeCost *= 2;
+                if (autoSmacker === 1) {
+                    setInterval(() => {
+                        cookieCount += autoSmacker;
+                        updateDisplay();
+                    }, 1000);
+                }
+            }
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            cookieCountDisplay.textContent = cookieCount;
+            clickUpgradeCostDisplay.textContent = clickUpgradeCost;
+            autoUpgradeCostDisplay.textContent = autoUpgradeCost;
+            document.getElementById('upgradeClick').disabled = cookieCount < clickUpgradeCost;
+            document.getElementById('upgradeAuto').disabled = cookieCount < autoUpgradeCost;
+        }
+    </script>
+</body>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Left Click Sound</title>
+</head>
+<body>
+    
+    <script>
+        (function() {
+            function playSound() {
+                const context = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = context.createOscillator();
+                const gainNode = context.createGain();
+
+                oscillator.type = 'square'; // Type of sound wave
+                oscillator.frequency.setValueAtTime(440, context.currentTime); // Frequency in hertz (A4 note)
+                oscillator.connect(gainNode);
+                gainNode.connect(context.destination);
+
+                gainNode.gain.setValueAtTime(0, context.currentTime);
+                gainNode.gain.linearRampToValueAtTime(1, context.currentTime + 0.01);
+                gainNode.gain.linearRampToValueAtTime(0, context.currentTime + 0.5);
+
+                oscillator.start(context.currentTime);
+                oscillator.stop(context.currentTime + 0.5);
+            }
+
+            document.addEventListener('click', function(event) {
+                playSound();
+            });
+        })();
+    </script>
+</body>
+</html>
